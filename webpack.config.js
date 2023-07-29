@@ -1,6 +1,5 @@
 const path = require('path');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
-const Nunjucks = require('nunjucks');
 
 const pages = require('./src/data/pages');
 
@@ -14,6 +13,7 @@ const createPages = (pages) => {
   });
   return entries;
 };
+
 module.exports = {
   mode: 'development',
   output: {
@@ -31,19 +31,13 @@ module.exports = {
         // output filename of extracted CSS
         filename: 'assets/css/[name].[contenthash:8].css',
       },
+      // use the template engine 'nunjucks' for compilation of entries
+      preprocessor: 'nunjucks',
     }),
   ],
 
   module: {
     rules: [
-      // HTML templates
-      {
-        test: /\.html$/,
-        loader: HtmlBundlerPlugin.loader, // HTML template loader
-        options: {
-          preprocessor: (content, { data }) => Nunjucks.renderString(content, data),
-        },
-      },
       // styles
       {
         test: /\.(css|sass|scss)$/,
@@ -58,5 +52,19 @@ module.exports = {
         },
       },
     ],
+  },
+
+  // enable HMR with live reload
+  devServer: {
+    open: true,
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    watchFiles: {
+      paths: ['src/**/*.*'],
+      options: {
+        usePolling: true,
+      },
+    },
   },
 };
